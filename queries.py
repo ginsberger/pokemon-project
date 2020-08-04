@@ -10,9 +10,9 @@ app = Flask(__name__)
 
 connection = pymysql.connect(
     host="localhost",
-    user="RENT",
-    password="",
-    db="sql_pokemon",
+    user="root",
+    password="GgBb123!@#",
+    db="pokemon_project",
     charset="utf8",
     cursorclass=pymysql.cursors.DictCursor
 )
@@ -190,10 +190,33 @@ def add_pokemon():
     except Exception as e:
         return Response(json.dumps({"Error": str(e)}), 500)
     
-    return Response(json.dumps({"Success": "update types"}), 200)
+    return Response(json.dumps({"Success": "add pokemon"}), 200)
 
 
 # I added the Pokemon number 161 from  the api
+
+
+@app.route('/delete_pokemon_of_trainer/<pokemon>/<trainer>', methods=["DELETE"])
+def delete_pokemon(pokemon, trainer):
+    try:
+        with connection.cursor() as cursor:
+            query = f"""SELECT *
+                    FROM OwnedBy
+                    WHERE pokemon_name = '{pokemon}' and trainer_name = '{trainer}'"""
+            cursor.execute(query)
+            result = cursor.fetchone()
+            if not result:
+                return Response(json.dumps({"Error": f"Trainer {trainer} does not trained pokemon {pokemon}"}), 404)
+
+            query = f"""DELETE FROM OwnedBy
+                    WHERE pokemon_name = '{pokemon}' and trainer_name = '{trainer}'"""
+            cursor.execute(query)
+            connection.commit()
+            
+    except Exception as e:
+        return Response(json.dumps({"Error": str(e)}), 500)
+
+    return Response(json.dumps({"Success": "delete pokemon"}), 200)
 
 
 if __name__ == '__main__':
