@@ -11,7 +11,7 @@ app = Flask(__name__)
 connection = pymysql.connect(
     host="localhost",
     user="root",
-    password="GgBb123!@#",
+    password="151428",
     db="pokemon_project",
     charset="utf8",
     cursorclass=pymysql.cursors.DictCursor
@@ -72,9 +72,44 @@ def find_by_type(type):
             return json.dumps({"Pokemons": [pokemon["name_"] for pokemon in pokemons]})
 
     except Exception as ex: 
-        return {"Error": str(ex)}, 500   
-    
+        return {"Error": str(ex)}, 500  
+      
+      
+@app.route('/get_pokemons_by_trainer/<name>')
+def get_pokemons_by_trainer(name):
+    try:
+        with connection.cursor() as cursor:
+            query = '''SELECT P.name_ 
+                FROM Pokemon P JOIN OwnedBy OB
+                on P.id = OB.pokemon_id 
+                WHERE OB.trainer_name = "{}" '''.format(name)
+            cursor.execute(query)
+            pokemons = cursor.fetchall()
+            if pokemons:
+                poke_name = [pokemon["name_"] for pokemon in pokemons]
+                return Response(json.dumps({"pokemons": poke_name}),200)
+            else:    
+                return Response(json.dumps({"Error": "Not Found"}), 404)  
+    except Exception as e:
+            return Response(json.dumps({"Error": str(e)}), 500)
 
+
+
+
+@app.route('/get_trainers/<name>', methods=["GET"])
+def find_owners(name):
+
+    query = "SELECT trainer_name FROM OwnedBy WHERE pokemon_name = '{}'".format(name)
+    
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            trainers = cursor.fetchall()
+            return Response(json.dumps({f"trainer's {name}": [trainer["trainer_name"] for trainer in trainers]}), 200)
+    except Exception as e: 
+        return Response(json.dumps({"Error": str(e)}), 500) 
+ 
+    
 @app.route('/evolve/<pokemon>/<trainer>')
 def evolve(pokemon, trainer):
 
@@ -116,8 +151,6 @@ def evolve(pokemon, trainer):
         return Response(json.dumps({"Error": str(e)}), 500)
 
     return Response(json.dumps({"Success": f"Pokemon {pokemon} evolved to {evolve} pokemon"}), 200)    #    
-
-
 
 
 if __name__ == '__main__':
