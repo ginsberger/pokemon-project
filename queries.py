@@ -11,7 +11,11 @@ app = Flask(__name__)
 connection = pymysql.connect(
     host="localhost",
     user="root",
+<<<<<<< HEAD
+    password="151428",
+=======
     password="GgBb123!@#",
+>>>>>>> master
     db="pokemon_project",
     charset="utf8",
     cursorclass=pymysql.cursors.DictCursor
@@ -55,6 +59,33 @@ def update_type(name):
     return Response(json.dumps({"Success": "update types"}), 200)
 
 
+<<<<<<< HEAD
+@app.route('/get_pokemons_by_trainer/<name>')
+def get_pokemons_by_trainer(name):
+    try:
+        with connection.cursor() as cursor:
+            query = '''SELECT P.name_ 
+                FROM Pokemon P JOIN OwnedBy OB
+                on P.id = OB.pokemon_id 
+                WHERE OB.trainer_name = "{}" '''.format(name)
+            cursor.execute(query)
+            pokemons = cursor.fetchall()
+            if pokemons:
+                poke_name = [pokemon["name_"] for pokemon in pokemons]
+                return Response(json.dumps({"pokemons": poke_name}),200)
+            else:    
+                return Response(json.dumps({"Error": "Not Found"}), 404)  
+    except Exception as e:
+            return Response(json.dumps({"Error": str(e)}), 500)
+
+
+if __name__ == '__main__':
+    app.run(port=3000)
+
+
+
+
+=======
 
 @app.route('/get_trainers/<name>', methods=["GET"])
 def find_owners(name):
@@ -94,3 +125,4 @@ def find_by_type(type):
 if __name__ == '__main__':
     app.run(port=3000)
 
+>>>>>>> master
