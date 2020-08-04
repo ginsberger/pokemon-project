@@ -55,7 +55,7 @@ def update_type(name):
     return Response(json.dumps({"Success": "update types"}), 200)
 
 
-@app.route('/get_pokemon_by_type/<type>')
+@app.route('/find_by_type/<type>')
 def find_by_type(type):
 
     query = f"SELECT name_\
@@ -74,6 +74,51 @@ def find_by_type(type):
     except Exception as ex: 
         return {"Error": str(ex)}, 500   
     
+
+@app.route('/evolve/<pokemon>/<trainer>')
+def evolve(pokemon, trainer):
+
+    # find evolve
+    pokemon_url = f'https://pokeapi.co/api/v2/pokemon/{pokemon}'
+    pokemon_data = requests.get(url=pokemon_url,verify=False).json()
+    species_url = pokemon_data["species"]["url"]
+    species_info = requests.get(url=species_url,verify=False).json()
+    evolution_chain_url = species_info["evolution_chain"]["url"]
+    evolution_chain_info = requests.get(url=evolution_chain_url,verify=False).json()
+    chain = evolution_chain_info["chain"]
+
+    while chain["species"]["name"] != pokemon:
+        chain = chain["evolves_to"][0]
+
+    if len(chain["evolves_to"]) == 0:
+        return Response(json.dumps({"Error": f"Pokemon {pokemon} can not evolve"}), 403)
+    
+    evolve = chain["evolves_to"][0]["species"]["name"]
+
+    # update tables
+    try:
+        with connection.cursor() as cursor:
+            query = "INSERT into Pokemon (id, name_, height, weight_) values ({}, '{}', {}, {})".format(pokemon_data["id"], evolve, pokemon_data["height"], pokemon_data["weight"])
+            try:
+                cursor.execute(query)
+            except IntegrityError as error: 
+                pass # It's OK just except it 
+
+            query = f"""UPDATE OwnedBy
+                    SET pokemon_name = '{evolve}'
+                    WHERE pokemon_name = '{pokemon}' and trainer_name = '{trainer}'"""
+            try:
+                cursor.execute(query)
+            except IntegrityError as error: 
+                return Response(json.dumps({"Error": f"Trainer {trainer} already trained the evolve {evolve} pokemon"}), 400) #
+        connection.commit() 
+    except Exception as e:
+        return Response(json.dumps({"Error": str(e)}), 500)
+
+    return Response(json.dumps({"Success": f"Pokemon {pokemon} evolved to {evolve} pokemon"}), 200)    #    
+
+
+
 
 if __name__ == '__main__':
     app.run(port=3000)
