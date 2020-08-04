@@ -6,7 +6,7 @@ import json
 connection = pymysql.connect(
     host="localhost",
     user="root",
-    password="GgBb123!@#",
+    password="151428",
     db="pokemon_project",
     charset="utf8",
     cursorclass=pymysql.cursors.DictCursor
@@ -56,7 +56,7 @@ def create_tables():
                         query = "INSERT into OwnedBy (pokemon_id, pokemon_name, trainer_name) values ({}, '{}', '{}')".format(row["id"], row["name"], trainer["name"])
                         cursor.execute(query)
                     except IntegrityError as error: 
-                        print( f'Error Trainer {trainer_name} already train pokemon {row["id"]}')              
+                        print( f'Error Trainer {trainer["name"]} already train pokemon {row["id"]}')              
                 connection.commit()
         except Exception as ex:
             print (f"Error {str(ex)}")
