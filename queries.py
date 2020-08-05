@@ -11,7 +11,7 @@ app = Flask(__name__)
 connection = pymysql.connect(
     host="localhost",
     user="root",
-    password="151428",
+    password="GgBb123!@#",
     db="pokemon_project",
     charset="utf8",
     cursorclass=pymysql.cursors.DictCursor
@@ -108,6 +108,7 @@ def find_owners(name):
         return Response(json.dumps({"Error": str(e)}), 500) 
  
     
+<<<<<<< HEAD
 @app.route('/evolve/<pokemon>/<trainer>',methods=["PATCH"])
 def evolve(pokemon, trainer):
     try:
@@ -162,6 +163,51 @@ def evolve(pokemon, trainer):
     return Response(json.dumps({"Success": f"Pokemon {pokemon} evolved to {evolve} pokemon"}), 200)     
 
 
+=======
+@app.route('/evolve/<pokemon>/<trainer>')
+def evolve(pokemon, trainer):
+
+    # find evolve
+    pokemon_url = f'https://pokeapi.co/api/v2/pokemon/{pokemon}'
+    pokemon_data = requests.get(url=pokemon_url,verify=False).json()
+    species_url = pokemon_data["species"]["url"]
+    species_info = requests.get(url=species_url,verify=False).json()
+    evolution_chain_url = species_info["evolution_chain"]["url"]
+    evolution_chain_info = requests.get(url=evolution_chain_url,verify=False).json()
+    chain = evolution_chain_info["chain"]
+
+    while chain["species"]["name"] != pokemon:
+        chain = chain["evolves_to"][0]
+
+    if len(chain["evolves_to"]) == 0:
+        return Response(json.dumps({"Error": f"Pokemon {pokemon} can not evolve"}), 403)
+    
+    evolve = chain["evolves_to"][0]["species"]["name"]
+
+    # update tables
+    try:
+        with connection.cursor() as cursor:
+            query = "INSERT into Pokemon (id, name_, height, weight_) values ({}, '{}', {}, {})".format(pokemon_data["id"], evolve, pokemon_data["height"], pokemon_data["weight"])
+            try:
+                cursor.execute(query)
+            except IntegrityError as error: 
+                pass # It's OK just except it 
+
+            query = f"""UPDATE OwnedBy
+                    SET pokemon_name = '{evolve}'
+                    WHERE pokemon_name = '{pokemon}' and trainer_name = '{trainer}'"""
+            try:
+                cursor.execute(query)
+            except IntegrityError as error: 
+                return Response(json.dumps({"Error": f"Trainer {trainer} already trained the evolve {evolve} pokemon"}), 400) #
+        connection.commit() 
+    except Exception as e:
+        return Response(json.dumps({"Error": str(e)}), 500)
+
+    return Response(json.dumps({"Success": f"Pokemon {pokemon} evolved to {evolve} pokemon"}), 200)    #    
+
+
+>>>>>>> 7402a0c176f08bf9cf12e58570897a72b2b41d4c
 @app.route('/add_pokemon', methods=["POST"])
 def add_pokemon():
     pokemon = request.get_json()
@@ -202,6 +248,35 @@ def add_pokemon():
         return Response(json.dumps({"Error": str(e)}), 500)
     
     return Response(json.dumps({"Success": "add pokemon"}), 200)
+<<<<<<< HEAD
+=======
+
+
+# I added the Pokemon number 161 from  the api
+
+
+@app.route('/delete_pokemon_of_trainer/<pokemon>/<trainer>', methods=["DELETE"])
+def delete_pokemon(pokemon, trainer):
+    try:
+        with connection.cursor() as cursor:
+            query = f"""SELECT *
+                    FROM OwnedBy
+                    WHERE pokemon_name = '{pokemon}' and trainer_name = '{trainer}'"""
+            cursor.execute(query)
+            result = cursor.fetchone()
+            if not result:
+                return Response(json.dumps({"Error": f"Trainer {trainer} does not trained pokemon {pokemon}"}), 404)
+
+            query = f"""DELETE FROM OwnedBy
+                    WHERE pokemon_name = '{pokemon}' and trainer_name = '{trainer}'"""
+            cursor.execute(query)
+            connection.commit()
+            
+    except Exception as e:
+        return Response(json.dumps({"Error": str(e)}), 500)
+
+    return Response(json.dumps({"Success": "delete pokemon"}), 200)
+>>>>>>> 7402a0c176f08bf9cf12e58570897a72b2b41d4c
 
 
 @app.route('/delete_pokemon_of_trainer/<pokemon>/<trainer>', methods=["DELETE"])
