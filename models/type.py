@@ -10,9 +10,9 @@ connection = pymysql.connect(
     cursorclass=pymysql.cursors.DictCursor
 )
 
-def insert_type(type_name):
+def insert_type(type_):
     with connection.cursor() as cursor:
-        query = "INSERT into Type_ (id, type_name) values (NULL, '{}')".format(type_name['type']['name'])
+        query = "INSERT into Type_ (id, type_name) values (NULL, '{}')".format(type_['type']['name'])
         try:
             cursor.execute(query)
             connection.commit()
@@ -20,9 +20,9 @@ def insert_type(type_name):
             pass # It's OK just except it 
         
         
-def get_type_id(type_name):
+def get_type_id(type_):
     with connection.cursor() as cursor:
-        query = "SELECT id FROM Type_ WHERE type_name = '{}'".format(type_name)
+        query = "SELECT id FROM Type_ WHERE type_name = '{}'".format(type_['type']['name'])
         cursor.execute(query)
         return cursor.fetchone()
                         

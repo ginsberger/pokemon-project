@@ -46,15 +46,15 @@ def check_owned_by(pokemon_name, trainer_name):
 def add_new_pokemon(pokemon_id, pokemon_name, pokemon_height, pokemon_weight, pokemon_types):
     with connection.cursor() as cursor:
         query = "INSERT into Pokemon (id, name_, height, weight_) values ({}, '{}', {}, {})".format(pokemon_id, pokemon_name, pokemon_height, pokemon_weight)
-    try:    
-        cursor.execute(query)
-        for type_ in pokemon_types:
-            type.insert_type(type_)
-            type_id  = type.get_type_id(type_)
-            type.add_type_to_pokemon(pokemon_id, type_id["id"])
-        connection.commit() 
-    except IntegrityError as error: 
-        pass # It's OK just except it 
+        try:    
+            cursor.execute(query)
+            for type_ in pokemon_types:
+                type.insert_type(type_)
+                type_id  = type.get_type_id(type_)
+                type.add_type_to_pokemon(pokemon_id, type_id["id"])
+            connection.commit() 
+        except IntegrityError as error: 
+            pass # It's OK just except it 
 
 
 def update_pokemon_of_trainer(pre_evolve, evolve, trainer_name):
@@ -69,7 +69,7 @@ def update_pokemon_of_trainer(pre_evolve, evolve, trainer_name):
 def delete_pokemon_of_trainer(pokemon_name, trainer_name):
     with connection.cursor() as cursor:
         query = f"""DELETE FROM OwnedBy
-                    WHERE pokemon_name = '{pokemon}' and trainer_name = '{trainer}'"""
+                    WHERE pokemon_name = '{pokemon_name}' and trainer_name = '{trainer_name}'"""
         cursor.execute(query)
         connection.commit()
             

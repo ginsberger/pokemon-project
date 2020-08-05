@@ -18,7 +18,7 @@ def update_type(pokemon_name):
     try:
         for type_ in pokemon_data["types"]:
             type.insert_type(type_)
-            type_id = type.get_type_id(type_['type']['name'])
+            type_id = type.get_type_id(type_)
             pokemon_id = pokemon.get_pokemon_id(pokemon_name)
             pokemon.add_type(pokemon_id["id"], type_id["id"])
 
@@ -38,10 +38,6 @@ def add_pokemon():
 
     try:
         pokemon.add_new_pokemon(pokemon_data["id"], pokemon_data["name"], pokemon_data["height"], pokemon_data["weight"], pokemon_data["types"]) 
-        # for type_ in pokemon_data["types"]:
-        #     type.insert_type(type_)
-        #     type_id  = type.get_type_id(type_)
-        #     type.add_type_to_pokemon(pokemon_data["id"], type_id["id"])
 
     except Exception as e:
         return Response(json.dumps({"Error": str(e)}), 500)
@@ -49,7 +45,7 @@ def add_pokemon():
     return Response(json.dumps({"Success": "add pokemon"}), 200)
 
 
-@app.route('/pokemons/<type_name>')
+@app.route('/pokemons/type/<type_name>')
 def pokemons_by_type(type_name):
     try:
         pokemons = type.get_pokemon_by_type(type_name)
@@ -62,7 +58,7 @@ def pokemons_by_type(type_name):
         return Response(json.dumps({"Error": str(ex)}), 500)
 
 
-@app.route('/pokemons/<trainer_name>')
+@app.route('/pokemons/trainer/<trainer_name>')
 def pokemons_by_trainer(trainer_name):
     try:
         pokemons = trainer.get_pokemons_by_trainer(trainer_name)
@@ -109,7 +105,7 @@ def evolve(pokemon_name, trainer_name):
     except Exception as e:
         return Response(json.dumps({"Error": str(e)}), 500)
 
-    return Response(json.dumps({"Success": f"Pokemon {pokemon} evolved to {evolve} pokemon"}), 200)     
+    return Response(json.dumps({"Success": f"Pokemon {pokemon_name} evolved to {evolve} pokemon"}), 200)     
 
 
 @app.route('/<pokemon_name>/<trainer_name>', methods=["DELETE"])

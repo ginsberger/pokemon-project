@@ -15,6 +15,6 @@ def get_pokemons_by_trainer(trainer_name):
         query = '''SELECT P.name_ 
             FROM Pokemon P JOIN OwnedBy OB
             on P.id = OB.pokemon_id                 
-            WHERE OB.trainer_name = "{}" '''.format(name)
+            WHERE OB.trainer_name = "{}" '''.format(trainer_name)
         cursor.execute(query)
         return cursor.fetchall()
