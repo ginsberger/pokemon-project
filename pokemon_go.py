@@ -55,7 +55,7 @@ class Player(pygame.sprite.Sprite):
 '''
 Setup
 '''
-worldx = 1000
+worldx = 1200
 worldy = 600
 
 fps = 10        # frame rate
@@ -72,10 +72,14 @@ player_group = pygame.sprite.GroupSingle()
 player_group.add(player)
 steps = 10     # how fast to move
 
+pygame.mixer.music.load("music/03.mp3")
+pygame.mixer.music.play(loops=-1)
+
 world.blit(backdrop, backdropbox)
 pygame.display.flip()
 clock = pygame.time.Clock()
 clock.tick(1)
+
 backdrop = pygame.image.load(os.path.join('images','background.jpg')).convert()
 world.blit(backdrop, backdropbox)
 pygame.display.flip()
@@ -87,8 +91,6 @@ for img in os.listdir(os.path.join('images','pokemon')):
     pokemon.rect.x = random.randint(0,worldx-100)
     pokemon.rect.y = random.randint(0,worldy-100)
     pokemon_group.add(pokemon)
-
-
 
 
 
@@ -113,17 +115,19 @@ while main == True:
                 player.control(0,steps)
 
         if event.type == pygame.KEYUP:
-            # if event.key == pygame.K_LEFT or event.key == ord('a'):
-            #     player.control(steps,0)
-            # if event.key == pygame.K_RIGHT or event.key == ord('d'):
-            #     player.control(-steps,0)
             if event.key == ord('q'):
                 pygame.quit()
                 sys.exit()
                 main = False
+
+    for pokemon in pokemon_group:
+        if pygame.sprite.spritecollideany(pokemon, player_group):
+            pokemon.kill()
+            
 
     player.update()
     player_group.draw(world) #refresh player position
     pokemon_group.draw(world)
     pygame.display.flip()
     clock.tick(fps)
+    
