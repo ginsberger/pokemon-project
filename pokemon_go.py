@@ -2,6 +2,7 @@ import pygame
 import sys
 import os
 import random
+from models.pokemon import update_pokemon_of_trainer
 '''
 Objects
 '''
@@ -25,6 +26,19 @@ class Player(pygame.sprite.Sprite):
         self.movex += x
         self.movey += y
 
+    def boundary_check(self):
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.left < 0:
+            self.rect.left = 0
+        elif self.rect.right > worldx:
+            self.rect.right = worldx
+        if self.rect.top <= 0:
+            self.rect.top = 0
+        elif self.rect.bottom >= worldy:
+            self.rect.bottom = worldy
+        
+
     def add_img(self, img, start_loction = (0, 0)):
         world.blit(img, start_loction)
         pygame.display.flip()
@@ -38,6 +52,7 @@ class Player(pygame.sprite.Sprite):
         Update sprite position
         '''
         self.add_img(backdrop)
+        self.boundary_check()
         self.rect.x = self.rect.x + self.movex
         self.rect.y = self.rect.y + self.movey
 
@@ -49,7 +64,6 @@ class Player(pygame.sprite.Sprite):
         # mouse_point = pygame.mouse.get_pos()
 
         # self.move_player(mouse_point)
-
 
 
 '''
@@ -114,17 +128,24 @@ while main == True:
                 player.control(0,-steps)
             if event.key == pygame.K_DOWN or event.key == ord('s'):
                 player.control(0,steps)
-
+        
         if event.type == pygame.KEYUP:
             if event.key == ord('q'):
                 pygame.quit()
                 sys.exit()
                 main = False
 
+    # player.update()
+    # for pokemon in pokemon_group:
+    #         pokemon.control(random.randint(0,worldx-100),random.randint(0,worldy-100))
+    # pokemon_group.draw(world)
+    
+
     for pokemon in pokemon_group:
         if pygame.sprite.spritecollideany(pokemon, player_group):
             pokemon.kill()
             
+
 
     player.update()
     player_group.draw(world) #refresh player position
