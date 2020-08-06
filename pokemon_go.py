@@ -115,4 +115,3 @@ while main == True:
     player_list.draw(world) #refresh player position
     pygame.display.flip()
     clock.tick(fps)
-    
