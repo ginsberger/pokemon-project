@@ -95,8 +95,6 @@ for img in os.listdir(os.path.join('images','pokemon')):
         pokemon.rect.y = random.randint(0,worldy-100)
     pokemon_group.add(pokemon)
 
-
-
 '''
 Main loop
 '''
