@@ -90,6 +90,9 @@ for img in os.listdir(os.path.join('images','pokemon')):
     pokemon = Player(f"pokemon/{img}")
     pokemon.rect.x = random.randint(0,worldx-100)
     pokemon.rect.y = random.randint(0,worldy-100)
+    while pygame.sprite.spritecollideany(pokemon, pokemon_group):
+        pokemon.rect.x = random.randint(0,worldx-100)
+        pokemon.rect.y = random.randint(0,worldy-100)
     pokemon_group.add(pokemon)
 
 
