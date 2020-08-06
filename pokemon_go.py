@@ -1,41 +1,117 @@
 import pygame
+import sys
+import os
 
-from pygame.locals import (
-    K_UP,
-    K_DOWN,
-    K_LEFT,
-    K_RIGHT,
-    K_ESCAPE,
-    KEYDOWN,
-    QUIT,
-)
+'''
+Objects
+'''
 
-pygame.init()
+class Player(pygame.sprite.Sprite):
+    '''
+    Spawn a player
+    '''
+    def __init__(self, image):
+        pygame.sprite.Sprite.__init__(self)
+        self.movex = 0
+        self.movey = 0
+        self.frame = 0
+        self.image = pygame.image.load(os.path.join('images', f"{image}.png"))
+        self.rect  = self.image.get_rect()
 
-SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 720
-REFRESH_RATE = 0.5
+    def control(self,x,y):
+        '''
+        control player movement
+        '''
+        self.movex += x
+        self.movey += y
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-IMAGE1 = 'open_background.jpg'
-img1 = pygame.image.load(IMAGE1)
-screen.blit(img1, (0, 0))
-pygame.display.flip()
+    def add_img(self, img, start_loction = (0, 0)):
+        world.blit(img, start_loction)
+        pygame.display.flip()
 
-IMAGE2 = 'background.jpg'
-img2 = pygame.image.load(IMAGE2)
-screen.blit(img2, (0, 0))
+    def move_player(self,loction):
+        self.add_img(backdrop)
+        self.add_img(self.image, loction)
 
-pygame.display.set_caption("Game")
+    def update(self):
+        '''
+        Update sprite position
+        '''
+        self.add_img(backdrop)
+        self.rect.x = self.rect.x + self.movex
+        self.rect.y = self.rect.y + self.movey
 
+        # moving left
+        # if self.movex < 0:
+        self.frame += 1
+        if self.frame > 3*ani:
+            self.frame = 0
+        # mouse_point = pygame.mouse.get_pos()
+
+        # self.move_player(mouse_point)
+
+
+
+'''
+Setup
+'''
+worldx = 1280
+worldy = 720
+
+fps = 10        # frame rate
+ani = 4        # animation cycles
 clock = pygame.time.Clock()
-clock.tick(REFRESH_RATE)
+pygame.init()
+main = True
+
+world = pygame.display.set_mode([worldx,worldy])
+backdrop = pygame.image.load(os.path.join('images','open_background.jpg')).convert()
+backdropbox = world.get_rect()
+player = Player("player")   # spawn player
+player_list = pygame.sprite.GroupSingle()
+player_list.add(player)
+steps = 10     # how fast to move
+
+world.blit(backdrop, backdropbox)
+pygame.display.flip()
+clock = pygame.time.Clock()
+clock.tick(1)
+backdrop = pygame.image.load(os.path.join('images','background.jpg')).convert()
+world.blit(backdrop, backdropbox)
 pygame.display.flip()
 
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            running = False
 
- 
+'''
+Main loop
+'''
+
+while main == True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit(); sys.exit()
+            main = False
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT or event.key == ord('a'):
+                player.control(-steps,0)
+            if event.key == pygame.K_RIGHT or event.key == ord('d'):
+                player.control(steps,0)
+            if event.key == pygame.K_UP or event.key == ord('w'):
+                player.control(0,-steps)
+            if event.key == pygame.K_DOWN or event.key == ord('s'):
+                player.control(0,steps)
+
+        if event.type == pygame.KEYUP:
+            # if event.key == pygame.K_LEFT or event.key == ord('a'):
+            #     player.control(steps,0)
+            # if event.key == pygame.K_RIGHT or event.key == ord('d'):
+            #     player.control(-steps,0)
+            if event.key == ord('q'):
+                pygame.quit()
+                sys.exit()
+                main = False
+
+    player.update()
+    player_list.draw(world) #refresh player position
+    pygame.display.flip()
+    clock.tick(fps)
