@@ -1,7 +1,7 @@
 import pygame
 import sys
 import os
-
+import random
 '''
 Objects
 '''
@@ -10,12 +10,12 @@ class Player(pygame.sprite.Sprite):
     '''
     Spawn a player
     '''
-    def __init__(self, image):
+    def __init__(self, path_image):
         pygame.sprite.Sprite.__init__(self)
         self.movex = 0
         self.movey = 0
         self.frame = 0
-        self.image = pygame.image.load(os.path.join('images', f"{image}.png"))
+        self.image = pygame.image.load(os.path.join('images/', f"{path_image}"))
         self.rect  = self.image.get_rect()
 
     def control(self,x,y):
@@ -55,8 +55,8 @@ class Player(pygame.sprite.Sprite):
 '''
 Setup
 '''
-worldx = 1280
-worldy = 720
+worldx = 1000
+worldy = 600
 
 fps = 10        # frame rate
 ani = 4        # animation cycles
@@ -67,9 +67,9 @@ main = True
 world = pygame.display.set_mode([worldx,worldy])
 backdrop = pygame.image.load(os.path.join('images','open_background.jpg')).convert()
 backdropbox = world.get_rect()
-player = Player("player")   # spawn player
-player_list = pygame.sprite.GroupSingle()
-player_list.add(player)
+player = Player("player/player.png")   # spawn player
+player_group = pygame.sprite.GroupSingle()
+player_group.add(player)
 steps = 10     # how fast to move
 
 world.blit(backdrop, backdropbox)
@@ -79,6 +79,17 @@ clock.tick(1)
 backdrop = pygame.image.load(os.path.join('images','background.jpg')).convert()
 world.blit(backdrop, backdropbox)
 pygame.display.flip()
+
+
+pokemon_group = pygame.sprite.Group()
+for img in os.listdir(os.path.join('images','pokemon')):
+    pokemon = Player(f"pokemon/{img}")
+    pokemon.rect.x = random.randint(0,worldx-100)
+    pokemon.rect.y = random.randint(0,worldy-100)
+    pokemon_group.add(pokemon)
+
+
+
 
 
 '''
@@ -112,6 +123,7 @@ while main == True:
                 main = False
 
     player.update()
-    player_list.draw(world) #refresh player position
+    player_group.draw(world) #refresh player position
+    pokemon_group.draw(world)
     pygame.display.flip()
     clock.tick(fps)
